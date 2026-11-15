@@ -25,14 +25,12 @@ CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o fastcopy-macos-amd64 .
 
 ## 打包与发布
 
-项目使用与依赖版本一致的 MyGo 0.9.0 打包器。`assets/icon.svg` 是图标源文件，`assets/icon.png` 是打包及窗口使用的 1024×1024 PNG；修改图标后需要同时更新 PNG。首次安装打包器需要网络：
+项目通过 `go.mod` 固定与依赖版本一致的 MyGo CLI，可直接使用 `go tool mygo`，首次运行需要下载 Go 模块。`assets/icon.svg` 是图标源文件，`assets/icon.png` 是打包及窗口使用的 1024×1024 PNG；修改图标后需要同时更新 PNG：
 
 ```sh
-go install github.com/egoist/mygo/cmd/mygo@v0.9.0
-# 将 $(go env GOPATH)/bin 加入 PATH
-mygo build -platform linux/amd64,linux/arm64
+go tool mygo build -platform linux/amd64,linux/arm64
 # 在 macOS 上运行，以生成 DMG
-mygo build -platform darwin/amd64,darwin/arm64
+go tool mygo build -platform darwin/amd64,darwin/arm64
 ```
 
 默认版本号在 `mygo.json`，产物位于 `dist/`。Linux 提供 `.deb`、`.rpm` 和含 `install.sh` 的 `.tar.gz`；安装脚本将应用安装到当前用户的 `~/.local`。Linux 包含桌面菜单入口和图标，依赖 GTK 3；在 Debian/Ubuntu 上可用 `sudo apt install ./包名.deb` 安装。macOS 生成 `.app` 和 `.dmg`；当前使用临时签名，未使用 Apple Developer ID 签名或公证，其他 Mac 的 Gatekeeper 可能阻止打开。跨平台构建不会生成 macOS DMG，必须在 macOS 上打包。

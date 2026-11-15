@@ -36,12 +36,10 @@ jobs:
           fi
       - run: go vet ./...
       - run: go test -race ./...
-      - name: Install packaging tool
-        run: go install github.com/egoist/mygo/cmd/mygo@v0.9.0
       - name: Build packages
         shell: bash
         run: |
-          "$(go env GOPATH)/bin/mygo" build -platform '${{ matrix.platform }}/amd64,${{ matrix.platform }}/arm64'
+          go tool mygo build -platform '${{ matrix.platform }}/amd64,${{ matrix.platform }}/arm64'
       - name: Check package outputs
         run: .github/scripts/check-packages.sh '${{ matrix.platform }}'
       - uses: actions/upload-artifact@v4
