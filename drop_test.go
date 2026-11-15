@@ -129,7 +129,7 @@ func TestTargetDropPendingAndStaleResults(t *testing.T) {
 func TestDropThroughWindowAndModal(t *testing.T) {
 	a := &app{checkDroppedDirectory: func(_ string, done func(error)) { done(nil) }}
 	actions := windowActions{minimize: func() {}, toggleMaximize: func() {}, close: func() {}, isMaximized: func() bool { return false }}
-	tt := ui.NewTester(func(c *ui.Context) { a.windowView(c, actions) }, 760, 800)
+	tt := ui.NewTester(func(c *ui.Context) { a.windowView(c, &actions) }, 760, 800)
 	tt.SetPreferences(ui.Preferences{ReduceMotion: true})
 	if !dropOn(t, tt, "来源路径", "/source") || a.sources != "/source" {
 		t.Fatal("source drop did not work with window header")
