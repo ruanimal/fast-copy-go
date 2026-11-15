@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"fastcopy-go/internal/copyengine"
@@ -545,7 +548,17 @@ func (a *app) view(c *ui.Context) {
 	a.persistPreferences()
 }
 func main() {
-	a := &app{status: "选择来源与目标后开始复制"}
+	command, code := parseCommand(os.Args[1:], os.Stdout, os.Stderr)
+	if code >= 0 {
+		os.Exit(code)
+	}
+	if !command.gui {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		code := runCLI(ctx, command, os.Stdout, os.Stderr)
+		stop()
+		os.Exit(code)
+	}
+	a := command.newApp()
 	a.applyPreferences(defaultPreferences())
 	preferencesStore, preferencesErr := defaultPreferencesStore()
 	if preferencesErr == nil {

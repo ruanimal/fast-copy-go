@@ -32,4 +32,13 @@ The release also includes `SHA256SUMS` for checking downloaded files.
 
 By default, files are copied when their size or modification time differs and verified with xxHash3. Regular files replace their destination only after writing, syncing, and optional verification complete. Features such as synchronization, moving, and deletion are not yet implemented.
 
+You can also pass one or more sources and an existing destination directory on the command line. By default the GUI opens with the paths filled in, and copying begins only when you click “Start copy”. Use `--cli` to copy directly:
+
+```sh
+fast-copy "source directory" "destination directory"
+fast-copy --cli "source directory" "another source" "destination directory"
+```
+
+Direct command-line copying uses the defaults, independently of saved GUI settings. Run `fast-copy --help` for usage.
+
 See the [detailed guide (Chinese)](docs/guide.zh-CN.md) for usage, platform differences, building, packaging, and testing.
