@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -78,7 +79,9 @@ func TestQueueAndStrategyShareOneLine(t *testing.T) {
 	strategyLabel := "并行读写 · " + ioBackendLabel("buffered")
 	queue, queueOK := tt.Find("校验队列 1 项")
 	strategy, strategyOK := tt.Find(strategyLabel)
-	if !queueOK || !strategyOK || queue.Y != strategy.Y || strategy.X <= queue.X+queue.W {
+	// The row centers text vertically; different glyphs can have different heights.
+	centerDelta := math.Abs(float64((queue.Y + queue.H/2) - (strategy.Y + strategy.H/2)))
+	if !queueOK || !strategyOK || centerDelta > 1 || strategy.X <= queue.X+queue.W {
 		t.Fatalf("queue and strategy are not on the same line: queue=%+v (%v), strategy=%+v (%v)", queue, queueOK, strategy, strategyOK)
 	}
 	if info, ok := tt.Access(strategyLabel); !ok || !strings.Contains(info.Description, "取决于两端文件系统和挂载选项") || !strings.Contains(info.Description, "来源文件系统未报告") {
@@ -535,7 +538,12 @@ func TestProgressCardFixedAcrossTaskStates(t *testing.T) {
 					}
 					if i == 0 {
 						reference = card
-					} else if card != reference {
+						// Text metrics vary slightly by content and platform, even with
+						// the same font size and the same number of progress lines.
+					} else if math.Abs(float64(card.X-reference.X)) > 1 ||
+						math.Abs(float64(card.Y-reference.Y)) > 1 ||
+						math.Abs(float64(card.W-reference.W)) > 1 ||
+						math.Abs(float64(card.H-reference.H)) > 1 {
 						t.Fatalf("card moved or resized: %+v; idle %+v", card, reference)
 					}
 					filter, ok := tt.Find("包含过滤")
