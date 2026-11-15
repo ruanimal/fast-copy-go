@@ -1,0 +1,35 @@
+# Fast Copy
+
+English | [简体中文](README.md)
+
+Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](https://github.com/egoist/mygo) and [onevra](https://github.com/oneo-me/onevra). The application interface is currently in Chinese.
+
+![Fast Copy main window](assets/screenshot.jpg)
+
+## Features
+
+- Add multiple sources, drag and drop or paste paths, and reuse recent destinations.
+- Choose how to handle existing files, filter paths, pause or cancel tasks, and verify files without copying.
+- Use batched reads and writes for the same disk or parallel I/O for different devices, with optional verification and preservation of file attributes and hard links.
+- Configure verification algorithms, buffers, and I/O settings in the advanced settings dialog.
+
+![Fast Copy advanced settings](assets/screenshot-settings.jpg)
+
+## Install
+
+Download the package for your system and architecture from [GitHub Releases](https://github.com/ruanimal/fast-copy-go/releases/latest):
+
+- **macOS**: Open the DMG for Apple Silicon (arm64) or Intel (amd64) and drag Fast Copy to Applications. The package uses an ad hoc signature and is not notarized by Apple, so Gatekeeper may prevent it from opening.
+- **Linux**: Choose a `.deb`, `.rpm`, or `.tar.gz` for your architecture. On Debian / Ubuntu, for example, run `sudo apt install ./package-name.deb`; the archive's `install.sh` installs to the current user's `~/.local`. GTK 3 and a graphical desktop are required.
+
+The release also includes `SHA256SUMS` for checking downloaded files.
+
+## Quick start
+
+1. Add files or folders as sources and select an existing destination folder.
+2. Choose how to handle existing files, an I/O strategy, and filters as needed.
+3. Click “开始复制” (Start Copy). You can pause, resume, or cancel a task; completed files are not rolled back.
+
+By default, files are copied when their size or modification time differs and verified with xxHash3. Regular files replace their destination only after writing, syncing, and optional verification complete. Features such as synchronization, moving, and deletion are not yet implemented.
+
+See the [detailed guide (Chinese)](docs/guide.zh-CN.md) for usage, platform differences, building, packaging, and testing.
