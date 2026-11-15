@@ -11,6 +11,7 @@ import (
 // preferences contains only settings that should carry over between launches.
 // Text fields are saved verbatim so even incomplete edits remain visible.
 type preferences struct {
+	Language          string `json:"language,omitempty"`
 	Operation         string `json:"operation"`
 	Mode              string `json:"mode"`
 	DiskMode          string `json:"disk_mode"`
@@ -32,12 +33,18 @@ func defaultPreferences() preferences {
 }
 
 func (a *app) preferences() preferences {
-	return preferences{a.operation, a.mode, a.diskMode, a.hashMode, a.verify, a.verifySourceAgain,
-		a.preserveXattrs, a.preserveACL, a.preserveHardlinks, a.preallocate, a.targetDirect,
-		a.chunkMB, a.batchMB, a.toleranceMS}
+	return preferences{
+		Language:  a.language,
+		Operation: a.operation, Mode: a.mode, DiskMode: a.diskMode, HashMode: a.hashMode,
+		Verify: a.verify, VerifySourceAgain: a.verifySourceAgain,
+		PreserveXattrs: a.preserveXattrs, PreserveACL: a.preserveACL, PreserveHardlinks: a.preserveHardlinks,
+		Preallocate: a.preallocate, TargetDirect: a.targetDirect,
+		ChunkMB: a.chunkMB, BatchMB: a.batchMB, ToleranceMS: a.toleranceMS,
+	}
 }
 
 func (a *app) applyPreferences(p preferences) {
+	a.language = p.Language
 	a.operation, a.mode, a.diskMode, a.hashMode = p.Operation, p.Mode, p.DiskMode, p.HashMode
 	a.verify, a.verifySourceAgain = p.Verify, p.VerifySourceAgain
 	a.preserveXattrs, a.preserveACL, a.preserveHardlinks = p.PreserveXattrs, p.PreserveACL, p.PreserveHardlinks
@@ -67,6 +74,9 @@ func (s *preferencesStore) load() (preferences, error) {
 	p := defaults
 	if err = json.Unmarshal(data, &p); err != nil {
 		return defaults, fmt.Errorf("解析设置：%w", err)
+	}
+	if !oneOf(p.Language, "", "en") {
+		p.Language = defaults.Language
 	}
 	// Unknown choices can come from a newer version or a manually edited file.
 	// Fall back separately so valid settings are still retained.

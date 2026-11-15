@@ -2,7 +2,7 @@
 
 [English](README.en.md) | 简体中文
 
-Fast Copy 是一款适用于 Linux 和 macOS 的图形化文件复制工具，使用 [mygo](https://github.com/egoist/mygo) 和 [onevra](https://github.com/oneo-me/onevra) 构建。界面目前为中文。
+Fast Copy 是一款适用于 Linux 和 macOS 的图形化文件复制工具，使用 [mygo](https://github.com/egoist/mygo) 和 [onevra](https://github.com/oneo-me/onevra) 构建，支持简体中文和英文界面。
 
 ![Fast Copy 主窗口](assets/screenshot.jpg)
 
@@ -11,7 +11,7 @@ Fast Copy 是一款适用于 Linux 和 macOS 的图形化文件复制工具，�
 - 支持多个来源、拖放或粘贴路径，以及最近使用的目标文件夹。
 - 提供覆盖策略、包含／排除过滤、暂停和取消，以及只读校验。
 - 根据存储设备选择同盘批量读写或并行读写，可选复制后校验、保留文件属性和硬链接。
-- 高级设置可调整校验算法、缓冲区和 I/O 参数。
+- 在高级设置中切换中英文，调整校验算法、缓冲区和 I/O 参数；设置会自动保存。
 
 ![Fast Copy 高级设置](assets/screenshot-settings.jpg)
 

@@ -2,7 +2,7 @@
 
 English | [简体中文](README.md)
 
-Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](https://github.com/egoist/mygo) and [onevra](https://github.com/oneo-me/onevra). The application interface is currently in Chinese.
+Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](https://github.com/egoist/mygo) and [onevra](https://github.com/oneo-me/onevra). The interface supports Simplified Chinese and English.
 
 ![Fast Copy main window](assets/screenshot.jpg)
 
@@ -11,7 +11,7 @@ Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](h
 - Add multiple sources, drag and drop or paste paths, and reuse recent destinations.
 - Choose how to handle existing files, filter paths, pause or cancel tasks, and verify files without copying.
 - Use batched reads and writes for the same disk or parallel I/O for different devices, with optional verification and preservation of file attributes and hard links.
-- Configure verification algorithms, buffers, and I/O settings in the advanced settings dialog.
+- Switch between Chinese and English and configure verification algorithms, buffers, and I/O settings in the advanced settings dialog. Settings are saved automatically.
 
 ![Fast Copy advanced settings](assets/screenshot-settings.jpg)
 
@@ -28,7 +28,7 @@ The release also includes `SHA256SUMS` for checking downloaded files.
 
 1. Add files or folders as sources and select an existing destination folder.
 2. Choose how to handle existing files, an I/O strategy, and filters as needed.
-3. Click “开始复制” (Start Copy). You can pause, resume, or cancel a task; completed files are not rolled back.
+3. Click “Start copy” (or “开始复制” in Chinese). You can pause, resume, or cancel a task; completed files are not rolled back.
 
 By default, files are copied when their size or modification time differs and verified with xxHash3. Regular files replace their destination only after writing, syncing, and optional verification complete. Features such as synchronization, moving, and deletion are not yet implemented.
 

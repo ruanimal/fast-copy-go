@@ -49,17 +49,17 @@ func (a *app) windowView(c *ui.Context, actions windowActions) {
 			ui.Row(c).FillWidth().Height(headerHeight).Shrink(0).Padding(4, 12).Gap(4).AlignItems(ui.Center).DragWindow().Children(func() {
 				components.Text(c, windowTitle).Bold().SingleLine()
 				ui.Spacer(c)
-				if components.IconButton(c, lucide.Minus(), "最小化", components.IconButtonPlain).Clicked() {
+				if components.IconButton(c, lucide.Minus(), a.tr("最小化"), components.IconButtonPlain).Clicked() {
 					actions.minimize()
 				}
 				maximizeIcon, maximizeLabel := lucide.Square(), "最大化"
 				if actions.isMaximized() {
 					maximizeIcon, maximizeLabel = lucide.Copy(), "还原窗口"
 				}
-				if components.IconButton(c, maximizeIcon, maximizeLabel, components.IconButtonPlain).Clicked() {
+				if components.IconButton(c, maximizeIcon, a.tr(maximizeLabel), components.IconButtonPlain).Clicked() {
 					actions.toggleMaximize()
 				}
-				if components.IconButton(c, lucide.X(), "关闭窗口", components.IconButtonPlain).Clicked() {
+				if components.IconButton(c, lucide.X(), a.tr("关闭窗口"), components.IconButtonPlain).Clicked() {
 					actions.close()
 				}
 			})
