@@ -1,0 +1,102 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-14
+            platform: darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go vet ./...
+      - run: go test -race ./...
+      - name: Set release version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?', tag):
+              raise SystemExit(f'Invalid release tag: {tag}')
+          path = Path('mygo.json')
+          config = json.loads(path.read_text())
+          config['version'] = tag[1:]
+          core_version = tag[1:].split('-', 1)[0]
+          config.setdefault('macos', {}).setdefault('infoPlist', {}).update({
+              'CFBundleVersion': core_version,
+              'CFBundleShortVersionString': core_version,
+          })
+          path.write_text(json.dumps(config, indent=2) + '\n')
+          PY
+      - name: Install packaging tool
+        run: go install github.com/egoist/mygo/cmd/mygo@v0.9.0
+      - name: Build packages
+        shell: bash
+        run: |
+          "$(go env GOPATH)/bin/mygo" build -platform '${{ matrix.platform }}/amd64,${{ matrix.platform }}/arm64'
+      - name: Check package outputs
+        run: .github/scripts/check-packages.sh '${{ matrix.platform }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: |
+            dist/**/*.deb
+            dist/**/*.rpm
+            dist/**/*.tar.gz
+            dist/**/*.dmg
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: artifacts
+          merge-multiple: true
+      - name: Collect packages and calculate checksums
+        shell: bash
+        run: |
+          mkdir release
+          while IFS= read -r -d '' file; do
+            name=${file##*/}
+            if [ -e "release/$name" ]; then
+              echo "Duplicate release asset: $name" >&2
+              exit 1
+            fi
+            cp "$file" "release/$name"
+          done < <(find artifacts -type f -print0)
+          cd release
+          sha256sum * > SHA256SUMS
+          sha256sum -c SHA256SUMS
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}

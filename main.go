@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
@@ -16,6 +17,9 @@ import (
 	"github.com/oneo-me/onevra/source/components"
 	"github.com/oneo-me/onevra/source/icons/lucide"
 )
+
+//go:embed assets/icon.png
+var appIcon []byte
 
 const minimumWindowHeight = 740
 
@@ -563,6 +567,9 @@ func main() {
 	}
 	mygo.App.WhenReady(func() {
 		a.win = newMainWindow(a)
+		if err := a.win.SetIcon(appIcon); err != nil {
+			log.Printf("设置窗口图标失败: %v", err)
+		}
 		a.win.OnMaximize(a.win.Invalidate)
 		a.win.OnUnmaximize(a.win.Invalidate)
 		a.win.OnClose(func(e *mygo.CloseEvent) {

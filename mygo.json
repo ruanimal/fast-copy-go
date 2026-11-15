@@ -1,0 +1,13 @@
+{
+  "name": "Fast Copy",
+  "slug": "fast-copy",
+  "identifier": "io.github.fastcopygo.app",
+  "version": "0.1.0",
+  "icon": "assets/icon.png",
+  "linux": {
+    "comment": "Fast file copying and verification",
+    "categories": ["Utility", "FileTools"],
+    "command": "fast-copy",
+    "webview": false
+  }
+}

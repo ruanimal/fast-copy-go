@@ -21,6 +21,22 @@ CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o fastcopy-macos-arm64 .
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o fastcopy-macos-amd64 .
 ```
 
+## 打包与发布
+
+项目使用与依赖版本一致的 MyGo 0.9.0 打包器。`assets/icon.svg` 是图标源文件，`assets/icon.png` 是打包及窗口使用的 1024×1024 PNG；修改图标后需要同时更新 PNG。首次安装打包器需要网络：
+
+```sh
+go install github.com/egoist/mygo/cmd/mygo@v0.9.0
+# 将 $(go env GOPATH)/bin 加入 PATH
+mygo build -platform linux/amd64,linux/arm64
+# 在 macOS 上运行，以生成 DMG
+mygo build -platform darwin/amd64,darwin/arm64
+```
+
+默认版本号在 `mygo.json`，产物位于 `dist/`。Linux 提供 `.deb`、`.rpm` 和含 `install.sh` 的 `.tar.gz`；安装脚本将应用安装到当前用户的 `~/.local`。Linux 包含桌面菜单入口和图标，依赖 GTK 3；在 Debian/Ubuntu 上可用 `sudo apt install ./包名.deb` 安装。macOS 生成 `.app` 和 `.dmg`；当前使用临时签名，未使用 Apple Developer ID 签名或公证，其他 Mac 的 Gatekeeper 可能阻止打开。跨平台构建不会生成 macOS DMG，必须在 macOS 上打包。
+
+CI 在 Linux 和 macOS 运行格式检查、`go vet`、竞争检测及两个架构的打包，并保留短期构建产物。推送如 `v1.2.3` 或 `v1.2.3-rc.1` 的 Git 标签会触发发布，标签去掉 `v` 后作为包版本；带预发布后缀的标签创建预发布版本。发布附带各平台安装包和 `SHA256SUMS`，可用 `sha256sum -c --ignore-missing SHA256SUMS` 校验已下载的文件。发布需要仓库允许 GitHub Actions 使用 `contents: write` 创建 Release；推送标签前应确认对应提交已通过 CI。
+
 ## 使用
 
 选择或输入一个或多个来源（每行一个）和一个已有的目标文件夹。路径中的首尾空格会保留，但界面暂不支持路径中包含换行符。来源以其原文件名放入目标文件夹，目录会合并。默认复制大小或修改时间不同的文件；也可以选择覆盖、跳过已有文件、仅覆盖较旧文件或只读校验。任务可暂停、继续或取消；暂停在当前 I/O 系统调用结束后生效，取消不会撤销已经完成的文件。任务结束后显示平均复制速度：以成功提交的普通文件逻辑大小除以总耗时，耗时包含扫描、校验和暂停；跳过或失败的文件不计入。稀疏文件和硬链接按逻辑大小计入，因此该速度并不等于物理磁盘写入速度。
