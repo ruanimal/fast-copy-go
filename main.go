@@ -30,6 +30,11 @@ type app struct {
 	speedValid                                                                                                                                                   bool
 	speedMeter                                                                                                                                                   *speedMeter
 	historyStore                                                                                                                                                 *destinationHistoryStore
+	preferencesStore                                                                                                                                             *preferencesStore
+	lastPreferences                                                                                                                                              preferences
+	preferencesWarning                                                                                                                                           string
+	preferencesSaveFailed                                                                                                                                        bool
+	sourcePaste, destinationPaste                                                                                                                                *filePaste
 	destinationHistory                                                                                                                                           []string
 	historyWarning                                                                                                                                               string
 	targetDropID                                                                                                                                                 uint64
@@ -311,6 +316,9 @@ func (a *app) view(c *ui.Context) {
 						components.Text(c, "文件复制").FontSize(22).Bold()
 						components.Text(c, "选择来源和目标，开始一个复制任务").FontSize(13).TextColor(t.TextMuted)
 					})
+					if a.preferencesWarning != "" {
+						components.Text(c, a.preferencesWarning).FontSize(12).SingleLine().MinWidth(0).Tooltip(a.preferencesWarning).TextColor(t.Danger)
+					}
 					components.Checkbox(c, &a.nonStop, "遇错继续").Disabled(a.running)
 					if components.Button(c, "高级设置…", components.ButtonSecondary).Disabled(a.running).Clicked() {
 						a.advanced = true
@@ -325,7 +333,19 @@ func (a *app) view(c *ui.Context) {
 							a.sources = ""
 						}
 					})
-					sourceField := components.TextBox(c, &a.sources, components.TextBoxOptions{Multiline: true, ReadOnly: a.running}).Grow(1).MinHeight(56).Placeholder("选择或拖入文件、文件夹，也可以输入路径（每行一个路径）").Label("来源路径")
+					sourceField := components.TextBox(c, &a.sources, components.TextBoxOptions{Multiline: true, ReadOnly: a.running}).Grow(1).MinHeight(56).Placeholder("选择、拖入或粘贴文件、文件夹，也可以输入路径（每行一个路径）").Label("来源路径")
+					if !a.running {
+						svc := c.Services()
+						sourceField.OnPaste(func(text string) bool { return queueFilePaste(svc, &a.sourcePaste, text) })
+						if pending := a.sourcePaste; pending != nil {
+							a.sourcePaste = nil
+							if pending.err != nil {
+								a.status = "失败：" + pending.err.Error()
+							} else {
+								a.appendSources(pending.paths)
+							}
+						}
+					}
 					if !a.running {
 						if paths := sourceField.DroppedFiles(); len(paths) > 0 {
 							a.appendSources(paths)
@@ -368,7 +388,7 @@ func (a *app) view(c *ui.Context) {
 					})
 					ui.Column(c).Grow(1).MinWidth(0).Gap(5).Children(func() {
 						components.Text(c, "读写策略").FontSize(12).TextColor(t.TextMuted)
-						components.NativeSelect(c, &a.diskMode, []components.NativeSelectOption[string]{{Value: "自动", Label: "自动"}, {Value: "同一硬盘", Label: "同一硬盘"}, {Value: "不同设备 / SSD", Label: "不同设备 / SSD"}}).Trigger.FillWidth().Disabled(a.running || verifyOnly).Label("读写策略")
+						components.NativeSelect(c, &a.diskMode, []components.NativeSelectOption[string]{{Value: "自动", Label: "自动"}, {Value: "同一硬盘", Label: "同一硬盘"}, {Value: "不同设备 / SSD", Label: "不同设备 / SSD"}}).Trigger.FillWidth().Disabled(a.running || verifyOnly).Label("读写策略选择")
 					})
 				})
 				ui.Row(c).FillWidth().AlignItems(ui.Center).Gap(8).Children(func() {
@@ -513,9 +533,24 @@ func (a *app) view(c *ui.Context) {
 		})
 	})
 	a.advancedDialog(c)
+	a.persistPreferences()
 }
 func main() {
-	a := &app{mode: "大小或时间不同", diskMode: "自动", hashMode: "xxHash3", operation: "复制", verify: true, preallocate: true, status: "选择来源与目标后开始复制"}
+	a := &app{status: "选择来源与目标后开始复制"}
+	a.applyPreferences(defaultPreferences())
+	preferencesStore, preferencesErr := defaultPreferencesStore()
+	if preferencesErr == nil {
+		a.preferencesStore = preferencesStore
+		var saved preferences
+		saved, preferencesErr = preferencesStore.load()
+		if preferencesErr == nil {
+			a.applyPreferences(saved)
+		}
+	}
+	if preferencesErr != nil {
+		a.preferencesWarning = "无法读取设置：" + preferencesErr.Error()
+	}
+	a.lastPreferences = a.preferences()
 	store, err := defaultHistoryStore()
 	if err != nil {
 		a.historyWarning = "无法读取历史记录：" + err.Error()
@@ -541,6 +576,7 @@ func main() {
 			}
 		})
 		a.win.OnClosed(func() {
+			a.flushPreferences()
 			if a.cancel != nil {
 				a.cancel()
 			}

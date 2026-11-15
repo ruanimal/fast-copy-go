@@ -59,6 +59,27 @@ func (s *destinationHistoryStore) load() ([]string, error) {
 	}
 	return sanitizeHistory(paths), nil
 }
+
+// clear removes persisted history without touching the selected destination.
+func (s *destinationHistoryStore) clear() error {
+	err := os.Remove(s.path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}
+
+func (a *app) clearDestinationHistory() {
+	if a.historyStore != nil {
+		if err := a.historyStore.clear(); err != nil {
+			a.historyWarning = "无法清除历史记录：" + err.Error()
+			return
+		}
+		a.historyWarning = ""
+	}
+	a.destinationHistory = nil
+}
+
 func (s *destinationHistoryStore) remember(path string) ([]string, error) {
 	paths, err := s.load()
 	if err != nil {

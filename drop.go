@@ -55,7 +55,7 @@ func (a *app) startTargetDrop(paths []string) {
 	}
 	a.cancelTargetDrop()
 	if len(paths) != 1 {
-		a.status = "失败：请只拖入一个目标文件夹"
+		a.status = "失败：请选择一个目标文件夹"
 		return
 	}
 	path := paths[0]

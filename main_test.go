@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -633,5 +634,74 @@ func TestExtraWindowHeightExpandsSourceInput(t *testing.T) {
 			t.Fatalf("source input did not grow with window: previous=%v current=%v", previousHeight, source.H)
 		}
 		previousHeight = source.H
+	}
+}
+
+func TestDestinationHistoryClearFromDropdown(t *testing.T) {
+	store := &destinationHistoryStore{path: filepath.Join(t.TempDir(), "history.json")}
+	for _, path := range []string{"/first", "/second"} {
+		if _, err := store.remember(path); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a := &app{destination: "/current", destinationHistory: []string{"/second", "/first"}, historyStore: store}
+	tt := ui.NewTester(func(c *ui.Context) { c.SetTheme(theme.LightPalette()); a.view(c) }, 760, 700)
+	if err := tt.Click("目标文件夹历史"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tt.Click("清除历史记录"); err != nil {
+		t.Fatal(err)
+	}
+	if len(a.destinationHistory) != 0 || a.destination != "/current" || a.historyWarning != "" {
+		t.Fatalf("clear: history=%v destination=%q warning=%q", a.destinationHistory, a.destination, a.historyWarning)
+	}
+	if got, err := store.load(); err != nil || len(got) != 0 {
+		t.Fatalf("persisted history: %v, %v", got, err)
+	}
+	if _, ok := tt.Find("最近使用的目标文件夹"); ok {
+		t.Fatal("history popup remained open")
+	}
+}
+
+func TestFilteringHistoryCannotSelectClearWithEnter(t *testing.T) {
+	a := &app{destinationHistory: []string{"/first"}}
+	tt := ui.NewTester(func(c *ui.Context) { c.SetTheme(theme.LightPalette()); a.view(c) }, 760, 700)
+	if err := tt.Click("目标文件夹路径"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type("no match")
+	if _, ok := tt.Find("清除历史记录"); ok {
+		t.Fatal("clear action visible in filtered list")
+	}
+	tt.Key(0, ui.KeyEnter)
+	if len(a.destinationHistory) != 1 || a.destination != "no match" {
+		t.Fatalf("typing cleared history: %v, %q", a.destinationHistory, a.destination)
+	}
+}
+
+func TestDestinationHistoryClearWithKeyboard(t *testing.T) {
+	a := &app{destination: "/current", destinationHistory: []string{"/first", "/second"}}
+	tt := ui.NewTester(func(c *ui.Context) { c.SetTheme(theme.LightPalette()); a.view(c) }, 760, 700)
+	if err := tt.Click("目标文件夹历史"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Key(0, ui.KeyDown)
+	tt.Key(0, ui.KeyDown)
+	tt.Key(0, ui.KeyDown)
+	tt.Key(0, ui.KeyEnter)
+	if len(a.destinationHistory) != 0 || a.destination != "/current" {
+		t.Fatalf("keyboard clear: %v, %q", a.destinationHistory, a.destination)
+	}
+}
+
+func TestDestinationHistoryClearVisibleWithFullList(t *testing.T) {
+	a := &app{destinationHistory: []string{"/one", "/two", "/three", "/four", "/five", "/six", "/seven"}}
+	tt := ui.NewTester(func(c *ui.Context) { c.SetTheme(theme.LightPalette()); a.view(c) }, 680, minimumWindowHeight-48)
+	if err := tt.Click("目标文件夹历史"); err != nil {
+		t.Fatal(err)
+	}
+	item, ok := tt.Find("清除历史记录")
+	if !ok || item.X < 0 || item.Y < 0 || item.X+item.W > 680 || item.Y+item.H > minimumWindowHeight-48 {
+		t.Fatalf("clear action outside viewport: %+v (found %v)", item, ok)
 	}
 }

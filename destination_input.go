@@ -8,6 +8,8 @@ import (
 	"github.com/oneo-me/onevra/source/icons/lucide"
 )
 
+const clearHistoryChoice = "\x00clear-destination-history"
+
 // destinationInput keeps text editing, file drops and history in one field.
 func (a *app) destinationInput(c *ui.Context) {
 	t := c.Theme()
@@ -20,6 +22,16 @@ func (a *app) destinationInput(c *ui.Context) {
 		if a.running {
 			field.Background(t.Surface.Mix(t.Text, .04).Alpha(.5))
 		} else {
+			svc := c.Services()
+			field.OnPaste(func(text string) bool { return queueFilePaste(svc, &a.destinationPaste, text) })
+			if pending := a.destinationPaste; pending != nil {
+				a.destinationPaste = nil
+				if pending.err != nil {
+					a.status = "失败：" + pending.err.Error()
+				} else {
+					a.startTargetDrop(pending.paths)
+				}
+			}
 			if field.Focused() {
 				field.Border(1, t.Accent)
 			} else if field.Hovered() {
@@ -59,10 +71,23 @@ func (a *app) destinationInput(c *ui.Context) {
 					}
 					item.Children(func() { components.Text(c, path).SingleLine().Ellipsis("…").MinWidth(0).Tooltip(path) })
 				}
+				// While typing, the first filtered item is automatically selected by
+				// Enter. Keep the clear action out of that list to avoid data loss.
+				if !combo.Filtering() {
+					item := combo.Item(clearHistoryChoice).Label("清除历史记录").FillWidth().Padding(6, 10).Radius(t.Radius)
+					if item.Highlighted() {
+						item.Background(t.Accent.Alpha(.12))
+					}
+					item.Children(func() { components.Text(c, "清除历史记录").TextColor(t.TextMuted) })
+				}
 			})
 			if path, ok := combo.Chosen(); ok {
-				a.cancelTargetDrop()
-				a.destination = path
+				if path == clearHistoryChoice {
+					a.clearDestinationHistory()
+				} else {
+					a.cancelTargetDrop()
+					a.destination = path
+				}
 			}
 		}
 	})

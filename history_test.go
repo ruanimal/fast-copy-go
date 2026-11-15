@@ -62,3 +62,35 @@ func TestSanitizeHistoryKeepsSpacesAndFiltersInvalidPaths(t *testing.T) {
 		t.Fatalf("got %v; want %v", got, want)
 	}
 }
+
+func TestClearDestinationHistoryPersists(t *testing.T) {
+	root := t.TempDir()
+	store := &destinationHistoryStore{path: filepath.Join(root, "history.json")}
+	if _, err := store.remember(filepath.Join(root, "target")); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.clear(); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := (&destinationHistoryStore{path: store.path}).load(); err != nil || len(got) != 0 {
+		t.Fatalf("history after restart: %v, %v", got, err)
+	}
+	if err := store.clear(); err != nil {
+		t.Fatalf("clearing missing history: %v", err)
+	}
+	if got, err := store.remember(filepath.Join(root, "new")); err != nil || len(got) != 1 {
+		t.Fatalf("remember after clearing: %v, %v", got, err)
+	}
+}
+
+func TestClearDestinationHistoryFailureKeepsEntries(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "child"), []byte("x"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	a := &app{historyStore: &destinationHistoryStore{path: root}, destination: "/selected", destinationHistory: []string{"/previous"}}
+	a.clearDestinationHistory()
+	if !reflect.DeepEqual(a.destinationHistory, []string{"/previous"}) || a.destination != "/selected" || a.historyWarning == "" {
+		t.Fatalf("clear failure: history=%v destination=%q warning=%q", a.destinationHistory, a.destination, a.historyWarning)
+	}
+}
