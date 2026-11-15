@@ -4,7 +4,7 @@ English | [简体中文](README.md)
 
 Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](https://github.com/egoist/mygo) and [onevra](https://github.com/oneo-me/onevra). The interface supports Simplified Chinese and English.
 
-![Fast Copy main window](assets/screenshot.jpg)
+![Fast Copy main window](assets/screenshot-en.png)
 
 ## Features
 
@@ -13,7 +13,7 @@ Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](h
 - Use batched reads and writes for the same disk or parallel I/O for different devices, with optional verification and preservation of file attributes and hard links.
 - Switch between Chinese and English and configure verification algorithms, buffers, and I/O settings in the advanced settings dialog. Settings are saved automatically.
 
-![Fast Copy advanced settings](assets/screenshot-settings.jpg)
+![Fast Copy advanced settings](assets/screenshot-settings-en.png)
 
 ## Install
 
@@ -26,9 +26,9 @@ The release also includes `SHA256SUMS` for checking downloaded files.
 
 ## Quick start
 
-1. Add files or folders as sources and select an existing destination folder.
+1. Use the buttons beside “Sources” to add files or folders, then use “Browse” beside “Destination folder” to select an existing folder.
 2. Choose how to handle existing files, an I/O strategy, and filters as needed.
-3. Click “Start copy” (or “开始复制” in Chinese). You can pause, resume, or cancel a task; completed files are not rolled back.
+3. Click “Start copy”. You can pause, resume, or cancel a task; completed files are not rolled back.
 
 By default, files are copied when their size or modification time differs and verified with xxHash3. Regular files replace their destination only after writing, syncing, and optional verification complete. Features such as synchronization, moving, and deletion are not yet implemented.
 
