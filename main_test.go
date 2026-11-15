@@ -47,8 +47,40 @@ func TestSourceHintAndClearPlacement(t *testing.T) {
 	}
 	a.running, a.cancel, a.gate = true, func() {}, &copyengine.Gate{}
 	tt.Frame()
-	if info, ok := tt.Access("清空"); !ok || !info.Disabled {
-		t.Fatalf("clear button is not disabled during a task: %+v (found %v)", info, ok)
+	for _, name := range []string{"清空", "添加文件", "添加文件夹", "浏览…"} {
+		if info, ok := tt.Access(name); !ok || !info.Disabled {
+			t.Fatalf("%q is not disabled during a task: %+v (found %v)", name, info, ok)
+		}
+	}
+}
+
+func TestPathActionsShareHeadingRows(t *testing.T) {
+	for _, language := range []string{"", "en"} {
+		t.Run(language, func(t *testing.T) {
+			a := &app{language: language}
+			tt := ui.NewTester(func(c *ui.Context) { c.SetTheme(theme.LightPalette()); a.view(c) }, 680, minimumWindowHeight-48)
+			for _, row := range []struct {
+				heading, field string
+				actions        []string
+			}{
+				{"来源", "来源路径", []string{"清空", "添加文件", "添加文件夹"}},
+				{"目标文件夹", "目标文件夹路径", []string{"浏览…"}},
+			} {
+				heading, headingOK := tt.Find(a.tr(row.heading))
+				field, fieldOK := tt.Find(a.tr(row.field))
+				if !headingOK || !fieldOK {
+					t.Fatalf("missing heading or field for %q", row.heading)
+				}
+				previousRight := heading.X + heading.W
+				for _, name := range row.actions {
+					action, ok := tt.Find(a.tr(name))
+					if !ok || action.X < previousRight || action.X+action.W > field.X+field.W+1 || action.Y+action.H > field.Y || math.Abs(float64(action.Y+action.H/2-heading.Y-heading.H/2)) > 1 {
+						t.Fatalf("%q not on the right side of %q: heading=%+v action=%+v field=%+v (found %v)", name, row.heading, heading, action, field, ok)
+					}
+					previousRight = action.X + action.W
+				}
+			}
+		})
 	}
 }
 

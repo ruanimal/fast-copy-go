@@ -341,6 +341,12 @@ func (a *app) view(c *ui.Context) {
 						if components.Button(c, a.tr("清空"), components.ButtonGhost).Padding(0, 8).Disabled(a.running).Clicked() {
 							a.sources = ""
 						}
+						if components.Button(c, a.tr("添加文件"), components.ButtonSecondary).Disabled(a.running).Clicked() {
+							a.pick(false, false)
+						}
+						if components.Button(c, a.tr("添加文件夹"), components.ButtonSecondary).Disabled(a.running).Clicked() {
+							a.pick(true, false)
+						}
 					})
 					sourceField := components.TextBox(c, &a.sources, components.TextBoxOptions{Multiline: true, ReadOnly: a.running}).Grow(1).MinHeight(56).Placeholder(a.tr("选择、拖入或粘贴文件、文件夹，也可以输入路径（每行一个路径）")).Label(a.tr("来源路径"))
 					if !a.running {
@@ -363,14 +369,6 @@ func (a *app) view(c *ui.Context) {
 							sourceField.Border(2, t.Accent)
 						}
 					}
-					ui.Row(c).FillWidth().Gap(8).Children(func() {
-						if components.Button(c, a.tr("添加文件"), components.ButtonSecondary).Disabled(a.running).Clicked() {
-							a.pick(false, false)
-						}
-						if components.Button(c, a.tr("添加文件夹"), components.ButtonSecondary).Disabled(a.running).Clicked() {
-							a.pick(true, false)
-						}
-					})
 					ui.Box(c).FillWidth().Height(1).Background(t.Border)
 					ui.Row(c).FillWidth().AlignItems(ui.Center).Gap(8).Children(func() {
 						components.Icon(c, lucide.FolderOpen).Size(17, 17).TextColor(t.Accent)
@@ -378,12 +376,13 @@ func (a *app) view(c *ui.Context) {
 						if a.historyWarning != "" {
 							components.Text(c, a.localizeMessage(a.historyWarning)).FontSize(12).SingleLine().MinWidth(0).Tooltip(a.localizeMessage(a.historyWarning)).TextColor(t.TextMuted)
 						}
-					})
-					ui.Row(c).FillWidth().Gap(8).Children(func() {
-						a.destinationInput(c)
+						ui.Spacer(c)
 						if components.Button(c, a.tr("浏览…"), components.ButtonSecondary).Disabled(a.running).Clicked() {
 							a.pick(true, true)
 						}
+					})
+					ui.Row(c).FillWidth().Gap(8).Children(func() {
+						a.destinationInput(c)
 					})
 				})
 				ui.Row(c).FillWidth().Gap(12).Children(func() {
