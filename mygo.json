@@ -2,7 +2,7 @@
   "name": "Fast Copy",
   "slug": "fast-copy",
   "identifier": "io.github.fastcopygo.app",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "icon": "assets/icon.png",
   "linux": {
     "comment": "Fast file copying and verification",
