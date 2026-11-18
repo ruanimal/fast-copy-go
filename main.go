@@ -27,26 +27,26 @@ var appIcon []byte
 const minimumWindowHeight = 740
 
 type app struct {
-	win                                                                                                                                                          *mygo.Window
-	sources, destination, mode, diskMode, hashMode, operation, status, chunkMB, batchMB, toleranceMS, includeFilter, excludeFilter, errorReport, language        string
-	verify, verifySourceAgain, preserveXattrs, preserveACL, preserveHardlinks, preallocate, targetDirect, nonStop, advanced, paused, canceling, running, closing bool
-	gate                                                                                                                                                         *copyengine.Gate
-	cancel                                                                                                                                                       context.CancelFunc
-	progress                                                                                                                                                     copyengine.Progress
-	liveSpeed                                                                                                                                                    int64
-	speedValid                                                                                                                                                   bool
-	speedMeter                                                                                                                                                   *speedMeter
-	historyStore                                                                                                                                                 *destinationHistoryStore
-	preferencesStore                                                                                                                                             *preferencesStore
-	lastPreferences                                                                                                                                              preferences
-	preferencesWarning                                                                                                                                           string
-	preferencesSaveFailed                                                                                                                                        bool
-	sourcePaste, destinationPaste                                                                                                                                *filePaste
-	destinationHistory                                                                                                                                           []string
-	historyWarning                                                                                                                                               string
-	targetDropID                                                                                                                                                 uint64
-	targetDropPending                                                                                                                                            bool
-	checkDroppedDirectory                                                                                                                                        func(string, func(error))
+	win                                                                                                                                                              *mygo.Window
+	sources, destination, mode, diskMode, hashMode, operation, status, chunkMB, batchMB, toleranceMS, includeFilter, excludeFilter, errorReport, language, themeMode string
+	verify, verifySourceAgain, preserveXattrs, preserveACL, preserveHardlinks, preallocate, targetDirect, nonStop, advanced, paused, canceling, running, closing     bool
+	gate                                                                                                                                                             *copyengine.Gate
+	cancel                                                                                                                                                           context.CancelFunc
+	progress                                                                                                                                                         copyengine.Progress
+	liveSpeed                                                                                                                                                        int64
+	speedValid                                                                                                                                                       bool
+	speedMeter                                                                                                                                                       *speedMeter
+	historyStore                                                                                                                                                     *destinationHistoryStore
+	preferencesStore                                                                                                                                                 *preferencesStore
+	lastPreferences                                                                                                                                                  preferences
+	preferencesWarning                                                                                                                                               string
+	preferencesSaveFailed                                                                                                                                            bool
+	sourcePaste, destinationPaste                                                                                                                                    *filePaste
+	destinationHistory                                                                                                                                               []string
+	historyWarning                                                                                                                                                   string
+	targetDropID                                                                                                                                                     uint64
+	targetDropPending                                                                                                                                                bool
+	checkDroppedDirectory                                                                                                                                            func(string, func(error))
 }
 
 func (a *app) pick(directory, destination bool) {

@@ -33,7 +33,7 @@ func TestLanguageSwitchPersistsAndPreservesChoices(t *testing.T) {
 	if a.language != "en" {
 		t.Fatalf("language = %q", a.language)
 	}
-	for _, label := range []string{"Language", "Extended attributes", "Verification algorithm", "Close"} {
+	for _, label := range []string{"Language", "Interface theme", "Extended attributes", "Verification algorithm", "Close"} {
 		r, ok := tt.Find(label)
 		if !ok || r.X < 0 || r.Y < 0 || r.X+r.W > 680 || r.Y+r.H > minimumWindowHeight-48 {
 			t.Errorf("English control %q outside viewport: %+v (found %v)", label, r, ok)

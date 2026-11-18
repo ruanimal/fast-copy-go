@@ -17,7 +17,7 @@ func TestPreferencesRoundTripAndDefaults(t *testing.T) {
 	if got, err := store.load(); err != nil || got != defaultPreferences() {
 		t.Fatalf("missing preferences: %+v, %v", got, err)
 	}
-	want := preferences{Operation: "仅校验", Mode: "覆盖", DiskMode: "不同设备 / SSD", HashMode: "SHA-512",
+	want := preferences{Theme: "dark", Operation: "仅校验", Mode: "覆盖", DiskMode: "不同设备 / SSD", HashMode: "SHA-512",
 		Verify: false, VerifySourceAgain: true, PreserveXattrs: true, PreserveACL: true, PreserveHardlinks: true,
 		Preallocate: false, TargetDirect: true, ChunkMB: "invalid", BatchMB: "64", ToleranceMS: "500"}
 	if err := store.save(want); err != nil {
@@ -40,7 +40,7 @@ func TestPreferencesRoundTripAndDefaults(t *testing.T) {
 func TestPreferencesPartialInvalidAndCorrupt(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "preferences.json")
 	store := &preferencesStore{path: path}
-	if err := os.WriteFile(path, []byte(`{"verify":false,"mode":"unknown","hash_mode":"SHA-256"}`), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(`{"verify":false,"mode":"unknown","hash_mode":"SHA-256","theme":"unknown"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	got, err := store.load()

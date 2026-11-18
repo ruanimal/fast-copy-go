@@ -12,6 +12,7 @@ import (
 // Text fields are saved verbatim so even incomplete edits remain visible.
 type preferences struct {
 	Language          string `json:"language,omitempty"`
+	Theme             string `json:"theme,omitempty"`
 	Operation         string `json:"operation"`
 	Mode              string `json:"mode"`
 	DiskMode          string `json:"disk_mode"`
@@ -34,7 +35,7 @@ func defaultPreferences() preferences {
 
 func (a *app) preferences() preferences {
 	return preferences{
-		Language:  a.language,
+		Language: a.language, Theme: a.themeMode,
 		Operation: a.operation, Mode: a.mode, DiskMode: a.diskMode, HashMode: a.hashMode,
 		Verify: a.verify, VerifySourceAgain: a.verifySourceAgain,
 		PreserveXattrs: a.preserveXattrs, PreserveACL: a.preserveACL, PreserveHardlinks: a.preserveHardlinks,
@@ -45,6 +46,7 @@ func (a *app) preferences() preferences {
 
 func (a *app) applyPreferences(p preferences) {
 	a.language = p.Language
+	a.themeMode = p.Theme
 	a.operation, a.mode, a.diskMode, a.hashMode = p.Operation, p.Mode, p.DiskMode, p.HashMode
 	a.verify, a.verifySourceAgain = p.Verify, p.VerifySourceAgain
 	a.preserveXattrs, a.preserveACL, a.preserveHardlinks = p.PreserveXattrs, p.PreserveACL, p.PreserveHardlinks
@@ -77,6 +79,9 @@ func (s *preferencesStore) load() (preferences, error) {
 	}
 	if !oneOf(p.Language, "", "en") {
 		p.Language = defaults.Language
+	}
+	if !oneOf(p.Theme, "", "light", "dark") {
+		p.Theme = defaults.Theme
 	}
 	// Unknown choices can come from a newer version or a manually edited file.
 	// Fall back separately so valid settings are still retained.

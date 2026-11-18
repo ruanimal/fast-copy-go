@@ -11,7 +11,7 @@ Fast Copy is a graphical file copy tool for Linux and macOS, built with [mygo](h
 - Add multiple sources, drag and drop or paste paths, and reuse recent destinations.
 - Choose how to handle existing files, filter paths, pause or cancel tasks, and verify files without copying.
 - Use batched reads and writes for the same disk or parallel I/O for different devices, with optional verification and preservation of file attributes and hard links.
-- Switch between Chinese and English and configure verification algorithms, buffers, and I/O settings in the advanced settings dialog. Settings are saved automatically.
+- Switch between Chinese and English, choose a light, dark, or system theme, and configure verification algorithms, buffers, and I/O settings in the advanced settings dialog. Settings are saved automatically.
 
 ![Fast Copy advanced settings](assets/screenshot-settings-en.png)
 

@@ -2,10 +2,56 @@ package main
 
 import (
 	"math"
+	"path/filepath"
 	"testing"
 
 	"github.com/egoist/mygo/ui"
 )
+
+func TestThemeSelectionAndSystemAppearance(t *testing.T) {
+	store := &preferencesStore{path: filepath.Join(t.TempDir(), "preferences.json")}
+	a := &app{preferencesStore: store}
+	a.applyPreferences(defaultPreferences())
+	a.lastPreferences = a.preferences()
+	var dark bool
+	tt := ui.NewTester(func(c *ui.Context) {
+		a.windowView(c, nil)
+		dark = c.Theme().Dark
+	}, 680, minimumWindowHeight)
+	tt.SetPreferences(ui.Preferences{ReduceMotion: true})
+	tt.SetDark(true)
+	tt.Frame()
+	if !dark {
+		t.Fatal("automatic theme did not follow dark system appearance")
+	}
+	if err := tt.Click("高级设置…"); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		label, mode string
+		wantDark    bool
+	}{{"亮色", "light", false}, {"暗色", "dark", true}, {"自动", "", true}} {
+		if err := tt.Click("界面主题"); err != nil {
+			t.Fatal(err)
+		}
+		if err := tt.ChooseMenuItem(tc.label); err != nil {
+			t.Fatal(err)
+		}
+		tt.Frame()
+		if a.themeMode != tc.mode || dark != tc.wantDark {
+			t.Fatalf("choose %s: mode=%q dark=%v", tc.label, a.themeMode, dark)
+		}
+		got, err := store.load()
+		if err != nil || got.Theme != tc.mode {
+			t.Fatalf("saved theme: %+v, %v", got, err)
+		}
+	}
+	tt.SetDark(false)
+	tt.Frame()
+	if dark {
+		t.Fatal("automatic theme did not follow light system appearance")
+	}
+}
 
 func TestLinuxWindowControlsAndLayout(t *testing.T) {
 	minimized, closed := false, false

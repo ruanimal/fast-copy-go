@@ -11,6 +11,10 @@ import (
 var english = map[string]string{
 	"语言":   "Language",
 	"界面语言": "Interface language",
+	"主题":   "Theme",
+	"界面主题": "Interface theme",
+	"亮色":   "Light",
+	"暗色":   "Dark",
 	"选择路径": "Choose paths",
 	"文件复制": "File copy",
 	"选择来源和目标，开始一个复制任务": "Choose sources and a destination to start a copy task",

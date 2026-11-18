@@ -20,7 +20,7 @@ type windowActions struct {
 
 func newMainWindow(a *app) *mygo.Window {
 	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-		shell := plain.NewShell(plain.ShellOptions{Title: windowTitle, Width: 760, Height: 800, MinWidth: 680, MinHeight: minimumWindowHeight, Theme: theme.Onevra, Content: a.view})
+		shell := plain.NewShell(plain.ShellOptions{Title: windowTitle, Width: 760, Height: 800, MinWidth: 680, MinHeight: minimumWindowHeight, Theme: a.windowTheme, Content: a.view})
 		return shell.Window()
 	}
 	opts := mygo.WindowOptions{
@@ -46,9 +46,19 @@ func newMainWindow(a *app) *mygo.Window {
 	return mygo.NewWindow(opts)
 }
 
+func (a *app) windowTheme(c *ui.Context) *ui.Theme {
+	switch a.themeMode {
+	case "light":
+		c.SetTheme(theme.LightPalette())
+	case "dark":
+		c.SetTheme(theme.DarkPalette())
+	}
+	return theme.Onevra(c)
+}
+
 // windowView draws the header; a nil actions value leaves window controls to macOS.
 func (a *app) windowView(c *ui.Context, actions *windowActions) {
-	c.SetTheme(theme.Onevra(c))
+	c.SetTheme(a.windowTheme(c))
 	t := c.Theme()
 	headerHeight := max(float32(48), t.Rem(3), c.TitleBar().Height)
 	components.WithDialogWindowDrag(c, headerHeight, func() {

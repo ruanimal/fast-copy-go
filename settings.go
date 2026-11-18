@@ -16,6 +16,8 @@ func (a *app) advancedDialog(c *ui.Context) {
 		ui.Row(c).FillWidth().AlignItems(ui.Center).Gap(10).Children(func() {
 			components.Text(c, a.tr("语言")).FontSize(12).TextColor(t.TextMuted)
 			components.NativeSelect(c, &a.language, []components.NativeSelectOption[string]{{Value: "", Label: "简体中文"}, {Value: "en", Label: "English"}}).Trigger.Width(160).Label(a.tr("界面语言"))
+			components.Text(c, a.tr("主题")).FontSize(12).TextColor(t.TextMuted)
+			components.NativeSelect(c, &a.themeMode, []components.NativeSelectOption[string]{{Value: "", Label: a.tr("自动")}, {Value: "light", Label: a.tr("亮色")}, {Value: "dark", Label: a.tr("暗色")}}).Trigger.Width(130).Label(a.tr("界面主题"))
 		})
 		components.Text(c, a.tr("文件属性与空间")).FontSize(12).TextColor(t.TextMuted)
 		ui.Row(c).FillWidth().AlignItems(ui.Center).Gap(18).Children(func() {
