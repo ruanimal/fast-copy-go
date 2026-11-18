@@ -21,7 +21,3 @@
 - 不要跨构建周期保存 `ui.Element`、组件 parts 或 `*ui.Context`；持久状态使用应用数据、控件状态和 `ui.Handle`，异步操作使用合适的 services。
 - 为有状态控件提供稳定身份；不要在视图构建中无条件执行副作用。耗时 I/O 放在 UI 线程之外，通过 `Window.Update` 安全发布结果。
 - MyGo UI 代码变更运行 `go tool mygo vet .` 和相关测试；依赖升级时检查对应版本的迁移说明。开发和打包使用项目固定版本的 `go tool mygo`。
-
-## Git
-
-- 推送时统一使用 `dit` 命令，参数与 `git` 相同。
